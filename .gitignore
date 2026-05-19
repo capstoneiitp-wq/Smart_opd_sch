@@ -9,3 +9,4 @@ deploy/certs/
 __pycache__/
 backend/__pycache__/
 frontend/node_modules/
+frontend/dist/

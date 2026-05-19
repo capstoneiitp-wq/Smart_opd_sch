@@ -21,13 +21,26 @@ class PersistenceConfig:
 
 
 def load_config() -> PersistenceConfig:
+    import os
+
+    # Railway MySQL plugin injects: MYSQLHOST, MYSQLPORT, MYSQLDATABASE, MYSQLUSER, MYSQLPASSWORD
+    # Fall back to those if our standard MYSQL_* vars aren't set.
+    def _mysql_env(standard_name: str, railway_name: str, default: str) -> str:
+        val = get_env(standard_name, "")
+        if val:
+            return val
+        return os.getenv(railway_name, default)
+
+    railway_mysql_present = bool(os.getenv("MYSQLHOST", ""))
+    mysql_enabled = get_bool_env("MYSQL_ENABLED", False) or railway_mysql_present
+
     return PersistenceConfig(
-        enabled=get_bool_env("MYSQL_ENABLED", False),
-        host=get_env("MYSQL_HOST", "127.0.0.1"),
-        port=int(get_env("MYSQL_PORT", "3306")),
-        database=get_env("MYSQL_DATABASE", "smart_opd"),
-        user=get_env("MYSQL_USER", "smartopd"),
-        password=get_env("MYSQL_PASSWORD", "smartopd"),
+        enabled=mysql_enabled,
+        host=_mysql_env("MYSQL_HOST", "MYSQLHOST", "127.0.0.1"),
+        port=int(_mysql_env("MYSQL_PORT", "MYSQLPORT", "3306")),
+        database=_mysql_env("MYSQL_DATABASE", "MYSQLDATABASE", "smart_opd"),
+        user=_mysql_env("MYSQL_USER", "MYSQLUSER", "smartopd"),
+        password=_mysql_env("MYSQL_PASSWORD", "MYSQLPASSWORD", "smartopd"),
     )
 
 

@@ -3,10 +3,10 @@ FROM python:3.11-slim
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && pip install --no-cache-dir gunicorn==22.0.0
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 5000
+EXPOSE 8080
 
-CMD ["gunicorn", "-k", "gthread", "--threads", "8", "-w", "1", "-b", "0.0.0.0:5000", "app:app"]
+CMD gunicorn -k gthread --threads 8 -w 1 -b 0.0.0.0:${PORT:-8080} app:app
